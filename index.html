@@ -1,210 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>The Dilemma - Login</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { 
-            margin: 0;
-            padding: 0;
-            font-family: 'Rajdhani', sans-serif; 
-            text-align: center; 
-            color: white;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #030108;
-            overflow: hidden; /* عشان الحركة متعملش شريط تمرير */
-            position: relative;
-        }
+	<head>
+		<meta charset="UTF-8">
+			<title>The Dilemma - Login</title>
+			<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+				<style>
+					body {
+					margin: 0;
+					padding: 0;
+					font-family: 'Rajdhani', sans-serif;
+					text-align: center;
+					color: white;
+					height: 100vh;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					background-color: #030108;
+					overflow: hidden;
+					position: relative;
+					}
 
-        /* الإضاءة المتحركة في الخلفية */
-        body::before {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle at 30% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
-                        radial-gradient(circle at 70% 70%, rgba(59, 130, 246, 0.1) 0%, transparent 40%);
-            animation: moveLights 15s linear infinite alternate;
-            z-index: -2;
-        }
+					/* الإضاءة المتحركة في الخلفية */
+					body::before {
+					content: '';
+					position: absolute;
+					top: -50%; left: -50%; width: 200%; height: 200%;
+					background: radial-gradient(circle at 30% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+					radial-gradient(circle at 70% 70%, rgba(59, 130, 246, 0.1) 0%, transparent 40%);
+					animation: moveLights 15s linear infinite alternate;
+					z-index: -2;
+					}
 
-        /* حركة الشبكة في الخلفية */
-        body::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: 
-                linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px);
-            background-size: 40px 40px;
-            animation: moveGrid 20s linear infinite;
-            z-index: -1;
-        }
+					/* حركة الشبكة في الخلفية */
+					body::after {
+					content: '';
+					position: absolute;
+					top: 0; left: 0; width: 100%; height: 100%;
+					background-image:
+					linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px),
+					linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px);
+					background-size: 40px 40px;
+					animation: moveGrid 20s linear infinite;
+					z-index: -1;
+					}
 
-        @keyframes moveLights {
-            0% { transform: rotate(0deg) scale(1); }
-            100% { transform: rotate(360deg) scale(1.2); }
-        }
+					@keyframes moveLights {
+					0% { transform: rotate(0deg) scale(1); }
+					100% { transform: rotate(360deg) scale(1.2); }
+					}
 
-        @keyframes moveGrid {
-            0% { background-position: 0px 0px; }
-            100% { background-position: 40px 40px; }
-        }
+					@keyframes moveGrid {
+					0% { background-position: 0px 0px; }
+					100% { background-position: 40px 40px; }
+					}
 
-        /* تعديل المربع لزوايا ناعمة ونبض */
-        .login-card { 
-            background: rgba(15, 10, 25, 0.6); 
-            backdrop-filter: blur(20px);
-            padding: 45px 40px; 
-            width: 330px; 
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            border-top: 4px solid #8b5cf6; /* خط علوي شيك بدل الجانبي */
-            border-radius: 20px; /* السر هنا: زوايا ناعمة جداً */
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
-            animation: cardBreathe 4s infinite alternate;
-        }
+					/* تعديل المربع لزوايا ناعمة ونبض */
+					.login-card {
+					background: rgba(15, 10, 25, 0.6);
+					backdrop-filter: blur(20px);
+					padding: 45px 40px;
+					width: 330px;
+					border: 1px solid rgba(139, 92, 246, 0.3);
+					border-top: 4px solid #8b5cf6;
+					border-radius: 20px;
+					box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+					animation: cardBreathe 4s infinite alternate;
+					}
 
-        @keyframes cardBreathe {
-            0% { box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1); }
-            100% { box-shadow: 0 10px 40px rgba(139, 92, 246, 0.3); }
-        }
+					@keyframes cardBreathe {
+					0% { box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1); }
+					100% { box-shadow: 0 10px 40px rgba(139, 92, 246, 0.3); }
+					}
 
-        .game-title { 
-            font-family: 'Orbitron', sans-serif; 
-            color: #fff; 
-            font-size: 34px; 
-            font-weight: 900;
-            margin-bottom: 5px; 
-            display: block; 
-            text-shadow: 0 0 15px #8b5cf6;
-            letter-spacing: 2px;
-        }
-        h2 { font-family: 'Orbitron', sans-serif; font-size: 14px; color: #a78bfa; letter-spacing: 4px; margin-top: 0; margin-bottom: 30px; text-transform: uppercase; }
+					.game-title {
+					font-family: 'Orbitron', sans-serif;
+					color: #fff;
+					font-size: 34px;
+					font-weight: 900;
+					margin-bottom: 5px;
+					display: block;
+					text-shadow: 0 0 15px #8b5cf6;
+					letter-spacing: 2px;
+					}
 
-        /* زوايا ناعمة للإدخال */
-        input { 
-            display: block; 
-            width: 85%; 
-            margin: 20px auto; 
-            padding: 14px; 
-            border: 1px solid rgba(139, 92, 246, 0.2);
-            border-radius: 12px; /* زوايا ناعمة */
-            background: rgba(255, 255, 255, 0.03);
-            color: white;
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 16px;
-            outline: none;
-            transition: 0.3s ease;
-        }
-        input::placeholder { color: #666; }
-        input:focus { 
-            background: rgba(139, 92, 246, 0.1);
-            border-color: #8b5cf6; 
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
-        }
+					h2 {
+					font-family: 'Orbitron', sans-serif;
+					font-size: 14px;
+					color: #a78bfa;
+					letter-spacing: 4px;
+					margin-top: 0;
+					margin-bottom: 30px;
+					text-transform: uppercase;
+					}
 
-        /* زوايا ناعمة للزراير */
-        button { 
-            font-family: 'Orbitron', sans-serif;
-            padding: 14px 20px; 
-            margin: 15px 5px 0; 
-            cursor: pointer; 
-            border-radius: 12px; /* زوايا ناعمة */
-            font-weight: bold; 
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            transition: 0.4s ease;
-        }
-        
-        #login-btn { 
-            width: 45%; 
-            background: #8b5cf6; 
-            color: white; 
-            border: none;
-            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
-        }
-        #register-btn { 
-            width: 45%; 
-            background: transparent;
-            border: 1px solid #666; 
-            color: #aaa; 
-        }
+					/* زوايا ناعمة للإدخال */
+					input {
+					display: block;
+					width: 85%;
+					margin: 20px auto;
+					padding: 14px;
+					border: 1px solid rgba(139, 92, 246, 0.2);
+					border-radius: 12px;
+					background: rgba(255, 255, 255, 0.03);
+					color: white;
+					font-family: 'Rajdhani', sans-serif;
+					font-size: 16px;
+					outline: none;
+					transition: 0.3s ease;
+					}
 
-        #login-btn:hover { 
-            background: #7c3aed; 
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.6); 
-        }
-        #register-btn:hover { 
-            border-color: #8b5cf6; 
-            color: #8b5cf6; 
-            background: rgba(139, 92, 246, 0.05);
-        }
-    </style>
-</head>
-<body>
+					input::placeholder { color: #666; }
 
-    <div class="login-card">
-        <h2><span class="game-title">THE DILEMMA</span>SYSTEM LOGIN</h2>
-        <input type="email" id="email-input" placeholder="ACCESS EMAIL">
-        <input type="password" id="password-input" placeholder="ACCESS CODE">
-        <button id="login-btn">ENTER</button>
-        <button id="register-btn">ENLIST</button>
-    </div>
+					input:focus {
+					background: rgba(139, 92, 246, 0.1);
+					border-color: #8b5cf6;
+					box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+					}
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-      
-    const firebaseConfig = {
-  apiKey: "AIzaSyCaDw0tyvGFqJgDTjaresWOe0SyCJo2Tt4",
-  authDomain: "the-dilemma-ky.firebaseapp.com",
-  projectId: "the-dilemma-ky",
-  storageBucket: "the-dilemma-ky.firebasestorage.app",
-  messagingSenderId: "785323303290",
-  appId: "1:785323303290:web:370f052cc499c8c410f6c3"
-};
+					/* زوايا ناعمة للزراير */
+					button {
+					font-family: 'Orbitron', sans-serif;
+					padding: 14px 20px;
+					margin: 15px 5px 0;
+					cursor: pointer;
+					border-radius: 12px;
+					font-weight: bold;
+					letter-spacing: 2px;
+					text-transform: uppercase;
+					transition: 0.4s ease;
+					}
 
+					#login-btn {
+					width: 45%;
+					background: #8b5cf6;
+					color: white;
+					border: none;
+					box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+					}
 
-      
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app); 
-        const db = getFirestore(app);
-      
-        const emailInput = document.getElementById('email-input');
-        const passwordInput = document.getElementById('password-input');
-        const registerBtn = document.getElementById('register-btn');
-        const loginBtn = document.getElementById('login-btn');
-      
-        registerBtn.addEventListener('click', async () => {
-          try {
-              const userCredential = await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-              await setDoc(doc(db, "users", userCredential.user.uid), {
-                  email: emailInput.value,
-                  role: "player", 
-                  trustPoints: 0  
-              });
-              alert("Account created successfully!");
-          } catch (error) {
-              alert("Error: " + error.message);
-          }
-        });
-      
-        loginBtn.addEventListener('click', async () => {
-          try {
-              const userCredential = await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-              const docSnap = await getDoc(doc(db, "users", userCredential.user.uid));
-              if (docSnap.exists()) {
-                  window.location.href = "dashboard.html";
-              }
-          } catch (error) {
-              alert("Invalid credentials. Access denied.");
-          }
-        });
-    </script>
-</body>
+					#register-btn {
+					width: 45%;
+					background: transparent;
+					border: 1px solid #666;
+					color: #aaa;
+					}
+
+					#login-btn:hover {
+					background: #7c3aed;
+					transform: translateY(-2px);
+					box-shadow: 0 8px 25px rgba(139, 92, 246, 0.6);
+					}
+
+					#register-btn:hover {
+					border-color: #8b5cf6;
+					color: #8b5cf6;
+					background: rgba(139, 92, 246, 0.05);
+					}
+				</style>
+			</head>
+	<body>
+		<div class="login-card">
+			<h2>
+				<span class="game-title">THE DILEMMA</span>SYSTEM LOGIN
+			</h2>
+			<input type="email" id="email-input" placeholder="ACCESS EMAIL">
+				<input type="password" id="password-input" placeholder="ACCESS CODE">
+					<button id="login-btn">ENTER</button>
+					<button id="register-btn">ENLIST</button>
+				</div>
+
+		<script type="module">
+			import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+			import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+			import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+			const firebaseConfig = {
+			apiKey: "AIzaSyCaDw0tyvGFqJgDTjaresWOe0SyCJo2Tt4",
+			authDomain: "the-dilemma-ky.firebaseapp.com",
+			projectId: "the-dilemma-ky",
+			storageBucket: "the-dilemma-ky.firebasestorage.app",
+			messagingSenderId: "785323303290",
+			appId: "1:785323303290:web:370f052cc499c8c410f6c3"
+			};
+
+			const app = initializeApp(firebaseConfig);
+			const auth = getAuth(app);
+			const db = getFirestore(app);
+
+			const emailInput = document.getElementById('email-input');
+			const passwordInput = document.getElementById('password-input');
+			const registerBtn = document.getElementById('register-btn');
+			const loginBtn = document.getElementById('login-btn');
+
+			registerBtn.addEventListener('click', async () => {
+			try {
+			const userCredential = await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+			await setDoc(doc(db, "users", userCredential.user.uid), {
+			email: emailInput.value,
+			role: "player",
+			trustPoints: 0
+			});
+			alert("Account created successfully!");
+			window.location.href = "dashboard.html"; // الإضافة تمت هنا
+			} catch (error) {
+			alert("Error: " + error.message);
+			}
+			});
+
+			loginBtn.addEventListener('click', async () => {
+			try {
+			const userCredential = await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+			const docSnap = await getDoc(doc(db, "users", userCredential.user.uid));
+			if (docSnap.exists()) {
+			window.location.href = "dashboard.html";
+			}
+			} catch (error) {
+			alert("Invalid credentials. Access denied.");
+			}
+			});
+		</script>
+	</body>
 </html>
