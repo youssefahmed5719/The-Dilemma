@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The Dilemma - Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            margin: 0; padding: 20px; font-family: 'Rajdhani', sans-serif; 
+            color: white; background-color: #030108; overflow-x: hidden; position: relative;
+            text-align: center;
+        }
+
+        body::before {
+            content: ''; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at 30% 30%, rgba(239, 68, 68, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 70% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+            animation: moveLights 15s linear infinite alternate; z-index: -2;
+        }
+        body::after {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(239, 68, 68, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(239, 68, 68, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px; animation: moveGrid 20s linear infinite; z-index: -1;
+        }
+        @keyframes moveLights { 0% { transform: rotate(0deg) scale(1); } 100% { transform: rotate(360deg) scale(1.2); } }
+        @keyframes moveGrid { 0% { background-position: 0px 0px; } 100% { background-position: 40px 40px; } }
+
+        .header-container { margin-bottom: 30px; margin-top: 40px; }
+        h1 { font-family: 'Orbitron', sans-serif; color: #ef4444; font-size: 36px; text-shadow: 0 0 15px rgba(239,68,68,0.5); letter-spacing: 4px; margin-bottom: 5px; }
+        
+        .back-btn {
+            font-family: 'Orbitron', sans-serif; position: absolute; top: 20px; left: 20px;
+            padding: 10px 20px; background: transparent; color: #8b5cf6; border: 1px solid #8b5cf6;
+            border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold;
+        }
+        .back-btn:hover { background: rgba(139,92,246,0.2); box-shadow: 0 0 10px #8b5cf6; }
+
+        /* زرار إغلاق السيرفر (طوارئ) */
+        .lockdown-btn {
+            font-family: 'Orbitron', sans-serif; padding: 15px 40px; font-size: 20px;
+            background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 2px solid #ef4444;
+            border-radius: 10px; cursor: pointer; transition: 0.3s; font-weight: 900;
+            letter-spacing: 3px; margin-bottom: 30px;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+        }
+        .lockdown-btn.active { background: #ef4444; color: white; box-shadow: 0 0 30px #ef4444; }
+
+        .table-container {
+            width: 95%; max-width: 1200px; margin: 0 auto;
+            background: rgba(15, 10, 25, 0.7); backdrop-filter: blur(15px);
+            border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 15px; padding: 20px;
+            overflow-x: auto;
+        }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { font-family: 'Orbitron', sans-serif; padding: 15px; color: #ef4444; border-bottom: 2px solid rgba(239, 68, 68, 0.3); letter-spacing: 2px; }
+        td { padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 18px; color: #ddd; }
+        tr:hover { background: rgba(255, 255, 255, 0.02); }
+
+        .action-btn { font-family: 'Orbitron', sans-serif; padding: 8px 10px; margin: 2px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 12px; }
+        .btn-add { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+        .btn-sub { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; }
+        .btn-promote { background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid #3b82f6; }
+        .btn-ban { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+        
+        .action-btn:hover { filter: brightness(1.5); }
+
+        .role-badge { padding: 5px 10px; border-radius: 5px; font-size: 14px; font-weight: bold; font-family: 'Orbitron', sans-serif; }
+        .role-admin { background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid #3b82f6; }
+        .role-player { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; border: 1px solid #8b5cf6; }
+        .role-banned { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; text-decoration: line-through; }
+
+    </style>
+</head>
+<body>
+
+    <button class="back-btn" onclick="window.location.href='dashboard.html'">BACK TO HQ</button>
+
+    <div class="header-container">
+        <h1>COMMAND CENTER</h1>
+    </div>
+
+    <button id="lockdown-btn" class="lockdown-btn">CHECKING SERVER STATUS...</button>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>EMAIL</th>
+                    <th>ROLE</th>
+                    <th>TRUST POINTS</th>
+                    <th>TRUST CONTROL</th>
+                    <th>AUTHORITY CONTROL</th>
+                </tr>
+            </thead>
+            <tbody id="roster-body">
+                <tr><td colspan="5" style="text-align: center;">LOADING DATABASE...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+        // زودنا setDoc و onSnapshot
+        import { getFirestore, doc, getDoc, getDocs, collection, updateDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+  apiKey: "AIzaSyCaDw0tyvGFqJgDTjaresWOe0SyCJo2Tt4",
+  authDomain: "the-dilemma-ky.firebaseapp.com",
+  projectId: "the-dilemma-ky",
+  storageBucket: "the-dilemma-ky.firebasestorage.app",
+  messagingSenderId: "785323303290",
+  appId: "1:785323303290:web:370f052cc499c8c410f6c3"
+};
+
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app); 
+        const db = getFirestore(app);
+
+        const rosterBody = document.getElementById('roster-body');
+        const lockdownBtn = document.getElementById('lockdown-btn');
+        let isServerLocked = false;
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const docSnap = await getDoc(doc(db, "users", user.uid));
+                if (docSnap.exists() && docSnap.data().role === "admin") {
+                    loadOperatives();
+                    setupServerLockdown();
+                } else {
+                    window.location.href = "dashboard.html";
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        // مراقبة حالة السيرفر بضغطة زرار
+        function setupServerLockdown() {
+            const serverRef = doc(db, "server", "status");
+            
+            // قراءة لحظية لحالة السيرفر
+            onSnapshot(serverRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    isServerLocked = docSnap.data().isLocked;
+                } else {
+                    // لو الملف مش موجود في الداتا بيز هيكريته أوتوماتيك
+                    setDoc(serverRef, { isLocked: false });
+                }
+                
+                if (isServerLocked) {
+                    lockdownBtn.innerText = "SERVER IS LOCKED (CLICK TO UNLOCK)";
+                    lockdownBtn.classList.add("active");
+                } else {
+                    lockdownBtn.innerText = "SERVER IS OPEN (CLICK TO LOCKDOWN)";
+                    lockdownBtn.classList.remove("active");
+                }
+            });
+
+            lockdownBtn.addEventListener('click', async () => {
+                await setDoc(serverRef, { isLocked: !isServerLocked }, { merge: true });
+            });
+        }
+
+        async function loadOperatives() {
+            const querySnapshot = await getDocs(collection(db, "users"));
+            rosterBody.innerHTML = ""; 
+
+            querySnapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const uid = docSnap.id;
+                
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${data.email}</td>
+                    <td><span class="role-badge role-${data.role}">${data.role.toUpperCase()}</span></td>
+                    <td style="font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: bold;">${data.trustPoints}</td>
+                    <td>
+                        <button class="action-btn btn-add" data-uid="${uid}" data-tp="${data.trustPoints}">+10 TP</button>
+                        <button class="action-btn btn-sub" data-uid="${uid}" data-tp="${data.trustPoints}">-10 TP</button>
+                    </td>
+                    <td>
+                        <button class="action-btn btn-promote" data-uid="${uid}">MAKE ADMIN</button>
+                        <button class="action-btn btn-ban" data-uid="${uid}">BAN USER</button>
+                    </td>
+                `;
+                rosterBody.appendChild(tr);
+            });
+        }
+
+        rosterBody.addEventListener('click', async (e) => {
+            const uid = e.target.dataset.uid;
+            if (!uid) return;
+
+            if(e.target.classList.contains('btn-add')) {
+                await updateDoc(doc(db, "users", uid), { trustPoints: parseInt(e.target.dataset.tp) + 10 });
+            } else if(e.target.classList.contains('btn-sub')) {
+                await updateDoc(doc(db, "users", uid), { trustPoints: parseInt(e.target.dataset.tp) - 10 });
+            } else if(e.target.classList.contains('btn-promote')) {
+                await updateDoc(doc(db, "users", uid), { role: "admin" });
+            } else if(e.target.classList.contains('btn-ban')) {
+                await updateDoc(doc(db, "users", uid), { role: "banned" });
+            }
+            loadOperatives(); 
+        });
+    </script>
+</body>
+</html>

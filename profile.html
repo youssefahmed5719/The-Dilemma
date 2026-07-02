@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The Dilemma - Account Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            margin: 0; font-family: 'Rajdhani', sans-serif; color: white;
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+            background-color: #030108; position: relative; padding-top: 80px; overflow-x: hidden;
+        }
+
+        body::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(139, 92, 246, 0.1) 0%, transparent 40%), radial-gradient(circle at 70% 70%, rgba(59, 130, 246, 0.05) 0%, transparent 40%); animation: moveLights 15s linear infinite alternate; z-index: -2; }
+        body::after { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px); background-size: 40px 40px; animation: moveGrid 20s linear infinite; z-index: -1; }
+        @keyframes moveLights { 0% { transform: rotate(0deg) scale(1); } 100% { transform: rotate(360deg) scale(1.2); } }
+        @keyframes moveGrid { 0% { background-position: 0px 0px; } 100% { background-position: 40px 40px; } }
+
+        .back-btn {
+            position: absolute; top: 20px; left: 20px; font-family: 'Orbitron', sans-serif;
+            padding: 10px 20px; font-size: 14px; background: transparent; color: #8b5cf6;
+            border: 1px solid #8b5cf6; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold;
+        }
+        .back-btn:hover { background: rgba(139, 92, 246, 0.2); box-shadow: 0 0 15px #8b5cf6; color: white; }
+
+        h1 { font-family: 'Orbitron', sans-serif; font-size: 36px; margin-bottom: 40px; letter-spacing: 4px; text-shadow: 0 0 15px #8b5cf6; text-align: center; }
+
+        .profile-container {
+            display: flex; gap: 30px; width: 90%; max-width: 1000px; justify-content: center;
+            flex-wrap: wrap; 
+        }
+
+        .panel {
+            background: rgba(15, 10, 25, 0.7); backdrop-filter: blur(15px);
+            padding: 30px; border: 1px solid rgba(139, 92, 246, 0.3);
+            border-top: 4px solid #8b5cf6; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            flex: 1; min-width: 300px; text-align: left;
+        }
+
+        .panel h2 { font-family: 'Orbitron', sans-serif; color: #a78bfa; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-top: 0; letter-spacing: 2px; font-size: 20px; }
+
+        .info-row { margin-bottom: 20px; }
+        .info-label { color: #888; font-size: 14px; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px; display: block; }
+        .info-value { font-family: 'Orbitron', sans-serif; font-size: 22px; color: white; text-shadow: 0 0 5px rgba(255,255,255,0.3); }
+        .highlight-value { color: #8b5cf6; text-shadow: 0 0 10px #8b5cf6; font-size: 28px; }
+
+        .input-group { margin-bottom: 25px; }
+        .input-group input {
+            width: 100%; box-sizing: border-box; padding: 12px 15px; background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(139,92,246,0.3); border-radius: 8px; color: white;
+            font-family: 'Rajdhani', sans-serif; font-size: 16px; outline: none; transition: 0.3s;
+        }
+        .input-group input:focus { border-color: #8b5cf6; background: rgba(139,92,246,0.1); box-shadow: 0 0 10px rgba(139,92,246,0.2); }
+        
+        .action-btn {
+            font-family: 'Orbitron', sans-serif; width: 100%; padding: 12px;
+            background: transparent; color: #8b5cf6; border: 1px solid #8b5cf6; border-radius: 8px;
+            cursor: pointer; font-weight: bold; transition: 0.3s; letter-spacing: 2px; margin-top: 10px;
+        }
+        .action-btn:hover { background: #8b5cf6; color: white; box-shadow: 0 0 15px #8b5cf6; }
+
+        /* زرار الريسيت المميز بلون مختلف للتحذير */
+        .reset-btn {
+            color: #f59e0b; border-color: #f59e0b;
+        }
+        .reset-btn:hover { background: #f59e0b; color: black; box-shadow: 0 0 15px #f59e0b; }
+
+        .security-notice {
+            color: #aaa; font-size: 14px; margin-top: 0; margin-bottom: 15px; line-height: 1.5;
+        }
+
+    </style>
+</head>
+<body>
+
+    <button class="back-btn" onclick="window.location.href='dashboard.html'">BACK TO HQ</button>
+
+    <h1>ACCOUNT MANAGEMENT</h1>
+
+    <div class="profile-container">
+        
+        <!-- الكارت الأول: الهوية والإحصائيات -->
+        <div class="panel">
+            <h2>OPERATIVE DOSSIER</h2>
+            
+            <div class="info-row">
+                <span class="info-label">REGISTERED EMAIL</span>
+                <span class="info-value" id="disp-email">Loading...</span>
+            </div>
+            
+            <div class="info-row">
+                <span class="info-label">SYSTEM ROLE</span>
+                <span class="info-value" id="disp-role">---</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">TRUST POINTS</span>
+                <span class="info-value highlight-value" id="disp-trust">---</span>
+            </div>
+        </div>
+
+        <!-- الكارت التاني: الأمان وتعديل الحساب -->
+        <div class="panel">
+            <h2>SECURITY & IDENTITY</h2>
+            
+            <div class="input-group">
+                <span class="info-label">CHANGE CODENAME (USERNAME)</span>
+                <input type="text" id="username-input" placeholder="Enter new codename">
+                <button class="action-btn" id="save-username-btn">UPDATE CODENAME</button>
+            </div>
+
+            <hr style="border: 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
+
+            <div class="input-group">
+                <span class="info-label">SYSTEM PASSWORD SECURITY</span>
+                <p class="security-notice">To ensure your account's safety, password changes require email verification. Click below to receive a secure reset link.</p>
+                <!-- زرار الأمان الجديد -->
+                <button class="action-btn reset-btn" id="reset-password-btn">SEND RESET LINK TO EMAIL</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        // استوردنا sendPasswordResetEmail بدل updatePassword
+        import { getAuth, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+  apiKey: "AIzaSyCaDw0tyvGFqJgDTjaresWOe0SyCJo2Tt4",
+  authDomain: "the-dilemma-ky.firebaseapp.com",
+  projectId: "the-dilemma-ky",
+  storageBucket: "the-dilemma-ky.firebasestorage.app",
+  messagingSenderId: "785323303290",
+  appId: "1:785323303290:web:370f052cc499c8c410f6c3"
+};
+
+
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app); 
+        const db = getFirestore(app);
+
+        const dispEmail = document.getElementById('disp-email');
+        const dispRole = document.getElementById('disp-role');
+        const dispTrust = document.getElementById('disp-trust');
+        
+        const usernameInput = document.getElementById('username-input');
+        const saveUsernameBtn = document.getElementById('save-username-btn');
+        const resetPasswordBtn = document.getElementById('reset-password-btn');
+
+        let currentUserUid = null;
+        let currentUserEmail = null; // هنحتفظ بالإيميل عشان نبعتله الرابط
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserUid = user.uid;
+                currentUserEmail = user.email;
+
+                onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+                    if (docSnap.exists()) {
+                        const userData = docSnap.data();
+                        
+                        if (userData.role === "banned") { window.location.href = "dashboard.html"; return; }
+
+                        dispEmail.innerText = userData.email;
+                        dispRole.innerText = userData.role.toUpperCase();
+                        dispTrust.innerText = userData.trustPoints;
+                        
+                        usernameInput.value = userData.username || "";
+                    }
+                });
+            } else {
+                window.location.href = "index.html"; 
+            }
+        });
+
+        // تعديل اليوزر نيم (زي ما هو)
+        saveUsernameBtn.addEventListener('click', async () => {
+            const newName = usernameInput.value.trim();
+            if (newName && currentUserUid) {
+                try {
+                    await updateDoc(doc(db, "users", currentUserUid), { username: newName });
+                    alert("CODENAME UPDATED SUCCESSFULLY!");
+                } catch (error) {
+                    alert("ERROR UPDATING CODENAME!");
+                }
+            } else {
+                alert("PLEASE ENTER A VALID CODENAME.");
+            }
+        });
+
+        // نظام تعديل الباسورد الآمن الجديد
+        resetPasswordBtn.addEventListener('click', async () => {
+            if (currentUserEmail) {
+                try {
+                    await sendPasswordResetEmail(auth, currentUserEmail);
+                    alert("SECURITY ALERT: A secure password reset link has been sent to your email (" + currentUserEmail + "). Please check your inbox and spam folder.");
+                } catch (error) {
+                    alert("ERROR: " + error.message);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
