@@ -1,148 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>The Dilemma - Headquarters</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { 
-            margin: 0; font-family: 'Rajdhani', sans-serif; text-align: center; color: white;
-            min-height: 100vh; display: flex; flex-direction: column; align-items: center;
-            justify-content: center; background-color: #030108; overflow: hidden; position: relative;
-        }
+	<head>
+		<meta charset="UTF-8">
+			<title>The Dilemma - Headquarters</title>
+			<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+				<style>
+					body {
+					margin: 0; font-family: 'Rajdhani', sans-serif; text-align: center; color: white;
+					min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+					justify-content: center; background-color: #030108; overflow: hidden; position: relative;
+					}
 
-        body::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 40%), radial-gradient(circle at 70% 70%, rgba(59, 130, 246, 0.1) 0%, transparent 40%); animation: moveLights 15s linear infinite alternate; z-index: -2; }
-        body::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px); background-size: 40px 40px; animation: moveGrid 20s linear infinite; z-index: -1; }
-        @keyframes moveLights { 0% { transform: rotate(0deg) scale(1); } 100% { transform: rotate(360deg) scale(1.2); } }
-        @keyframes moveGrid { 0% { background-position: 0px 0px; } 100% { background-position: 40px 40px; } }
+					body::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 40%), radial-gradient(circle at 70% 70%, rgba(59, 130, 246, 0.1) 0%, transparent 40%); animation: moveLights 15s linear infinite alternate; z-index: -2; }
+					body::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px); background-size: 40px 40px; animation: moveGrid 20s linear infinite; z-index: -1; }
+					@keyframes moveLights { 0% { transform: rotate(0deg) scale(1); } 100% { transform: rotate(360deg) scale(1.2); } }
+					@keyframes moveGrid { 0% { background-position: 0px 0px; } 100% { background-position: 40px 40px; } }
 
-        .menu-toggle-btn { position: absolute; top: 20px; left: 20px; z-index: 10; font-family: 'Orbitron', sans-serif; padding: 10px 20px; font-size: 16px; background: rgba(15, 10, 25, 0.8); color: #8b5cf6; border: 1px solid #8b5cf6; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold; letter-spacing: 2px; }
-        .menu-toggle-btn:hover { background: #8b5cf6; color: white; box-shadow: 0 0 15px #8b5cf6; }
+					.menu-toggle-btn { position: absolute; top: 20px; left: 20px; z-index: 10; font-family: 'Orbitron', sans-serif; padding: 10px 20px; font-size: 16px; background: rgba(15, 10, 25, 0.8); color: #8b5cf6; border: 1px solid #8b5cf6; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold; letter-spacing: 2px; }
+					.menu-toggle-btn:hover { background: #8b5cf6; color: white; box-shadow: 0 0 15px #8b5cf6; }
 
-        .sidebar { position: fixed; top: 0; left: -350px; width: 300px; height: 100%; background: rgba(10, 5, 15, 0.95); backdrop-filter: blur(20px); border-right: 2px solid #8b5cf6; box-shadow: 10px 0 30px rgba(0,0,0,0.8); z-index: 20; transition: left 0.4s ease-in-out; padding: 30px 20px; display: flex; flex-direction: column; text-align: left; }
-        .sidebar.active { left: 0; }
-        
-        .close-sidebar-btn { background: transparent; color: #aaa; border: none; font-size: 30px; cursor: pointer; align-self: flex-end; transition: 0.3s; }
-        .close-sidebar-btn:hover { color: #ef4444; text-shadow: 0 0 10px #ef4444; }
+					.sidebar { position: fixed; top: 0; left: -350px; width: 300px; height: 100%; background: rgba(10, 5, 15, 0.95); backdrop-filter: blur(20px); border-right: 2px solid #8b5cf6; box-shadow: 10px 0 30px rgba(0,0,0,0.8); z-index: 20; transition: left 0.4s ease-in-out; padding: 30px 20px; display: flex; flex-direction: column; text-align: left; }
+					.sidebar.active { left: 0; }
 
-        .sidebar h2 { font-family: 'Orbitron', sans-serif; color: #fff; font-size: 20px; border-bottom: 1px solid rgba(139, 92, 246, 0.3); padding-bottom: 10px; margin-bottom: 20px; letter-spacing: 2px; text-shadow: 0 0 10px #8b5cf6; }
-        
-        .sidebar-btn { font-family: 'Orbitron', sans-serif; width: 100%; padding: 15px; margin-top: 15px; background: transparent; color: #ddd; border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; }
-        .sidebar-btn:hover { background: rgba(139, 92, 246, 0.1); border-color: #8b5cf6; color: white; box-shadow: inset 0 0 10px rgba(139, 92, 246, 0.2); }
-        
-        .logout-btn { color: #ef4444; border-color: rgba(239, 68, 68, 0.5); margin-top: auto; }
-        .logout-btn:hover { background: rgba(239, 68, 68, 0.15); border-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); color: white; }
+					.close-sidebar-btn { background: transparent; color: #aaa; border: none; font-size: 30px; cursor: pointer; align-self: flex-end; transition: 0.3s; }
+					.close-sidebar-btn:hover { color: #ef4444; text-shadow: 0 0 10px #ef4444; }
 
-        .user-card { background: rgba(15, 10, 25, 0.6); backdrop-filter: blur(20px); padding: 35px 30px; width: 340px; border: 1px solid rgba(139, 92, 246, 0.3); border-top: 4px solid #8b5cf6; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); margin-bottom: 40px; animation: cardBreathe 4s infinite alternate; }
-        @keyframes cardBreathe { 0% { box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1); } 100% { box-shadow: 0 10px 40px rgba(139, 92, 246, 0.3); } }
+					.sidebar h2 { font-family: 'Orbitron', sans-serif; color: #fff; font-size: 20px; border-bottom: 1px solid rgba(139, 92, 246, 0.3); padding-bottom: 10px; margin-bottom: 20px; letter-spacing: 2px; text-shadow: 0 0 10px #8b5cf6; }
 
-        #user-display-name { font-family: 'Orbitron', sans-serif; color: #fff; font-size: 24px; text-shadow: 0 0 10px #8b5cf6; margin: 0 0 5px 0; letter-spacing: 2px;}
-        #user-email { color: #a78bfa; margin-top: 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
-        .stat { font-size: 20px; color: #aaa; margin: 15px 0; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 10px; }
-        .stat span { font-family: 'Orbitron', sans-serif; font-weight: bold; color: white; text-shadow: 0 0 8px rgba(139, 92, 246, 0.5); }
+					.sidebar-btn { font-family: 'Orbitron', sans-serif; width: 100%; padding: 15px; margin-top: 15px; background: transparent; color: #ddd; border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; }
+					.sidebar-btn:hover { background: rgba(139, 92, 246, 0.1); border-color: #8b5cf6; color: white; box-shadow: inset 0 0 10px rgba(139, 92, 246, 0.2); }
 
-        h1 { font-family: 'Orbitron', sans-serif; font-size: 46px; margin-bottom: 40px; letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 0 15px #8b5cf6, 0 0 30px rgba(139, 92, 246, 0.6); }
+					.logout-btn { color: #ef4444; border-color: rgba(239, 68, 68, 0.5); margin-top: auto; }
+					.logout-btn:hover { background: rgba(239, 68, 68, 0.15); border-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); color: white; }
 
-        .btn { font-family: 'Orbitron', sans-serif; padding: 16px 65px; font-size: 26px; font-weight: 900; cursor: pointer; background: #8b5cf6; color: white; border: none; border-radius: 16px; transition: 0.4s ease; letter-spacing: 4px; animation: pulseBtn 3s infinite; }
-        @keyframes pulseBtn { 0% { box-shadow: 0 0 15px rgba(139, 92, 246, 0.4); } 50% { box-shadow: 0 0 35px rgba(139, 92, 246, 0.8); } 100% { box-shadow: 0 0 15px rgba(139, 92, 246, 0.4); } }
-        .btn:hover { background-color: #7c3aed; transform: scale(1.05) translateY(-3px); text-shadow: 0 0 10px #fff; }
-        .btn:disabled { background: #555; color: #aaa; cursor: not-allowed; animation: none; box-shadow: none; transform: none; text-shadow: none; }
+					.user-card { background: rgba(15, 10, 25, 0.6); backdrop-filter: blur(20px); padding: 35px 30px; width: 340px; border: 1px solid rgba(139, 92, 246, 0.3); border-top: 4px solid #8b5cf6; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); margin-bottom: 40px; animation: cardBreathe 4s infinite alternate; }
+					@keyframes cardBreathe { 0% { box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1); } 100% { box-shadow: 0 10px 40px rgba(139, 92, 246, 0.3); } }
 
-        .admin-btn { font-family: 'Orbitron', sans-serif; background-color: transparent; color: #ef4444; padding: 12px 20px; border: 1px solid rgba(239, 68, 68, 0.5); border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 20px; width: 100%; display: none; transition: 0.3s; letter-spacing: 2px; }
-        .admin-btn:hover { background-color: rgba(239, 68, 68, 0.15); border-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
+					#user-display-name { font-family: 'Orbitron', sans-serif; color: #fff; font-size: 24px; text-shadow: 0 0 10px #8b5cf6; margin: 0 0 5px 0; letter-spacing: 2px;}
+					#user-email { color: #a78bfa; margin-top: 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+					.stat { font-size: 20px; color: #aaa; margin: 15px 0; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 10px; }
+					.stat span { font-family: 'Orbitron', sans-serif; font-weight: bold; color: white; text-shadow: 0 0 8px rgba(139, 92, 246, 0.5); }
 
-        .banned-screen { display: none; background: rgba(20,0,0,0.9); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
-        .banned-screen h1 { color: #ef4444; font-size: 60px; text-shadow: 0 0 30px #ef4444; margin-bottom: 10px; }
-        .banned-screen p { color: white; font-size: 24px; letter-spacing: 2px; }
-    </style>
-</head>
-<body>
+					h1 { font-family: 'Orbitron', sans-serif; font-size: 46px; margin-bottom: 40px; letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 0 15px #8b5cf6, 0 0 30px rgba(139, 92, 246, 0.6); }
 
-    <div class="banned-screen" id="banned-screen">
-        <h1>ACCESS DENIED</h1>
-        <p>YOUR TRUST HAS BEEN REVOKED. ACCOUNT BANNED.</p>
-    </div>
+					.btn { font-family: 'Orbitron', sans-serif; padding: 16px 65px; font-size: 26px; font-weight: 900; cursor: pointer; background: #8b5cf6; color: white; border: none; border-radius: 16px; transition: 0.4s ease; letter-spacing: 4px; animation: pulseBtn 3s infinite; }
+					@keyframes pulseBtn { 0% { box-shadow: 0 0 15px rgba(139, 92, 246, 0.4); } 50% { box-shadow: 0 0 35px rgba(139, 92, 246, 0.8); } 100% { box-shadow: 0 0 15px rgba(139, 92, 246, 0.4); } }
+					.btn:hover { background-color: #7c3aed; transform: scale(1.05) translateY(-3px); text-shadow: 0 0 10px #fff; }
+					.btn:disabled { background: #555; color: #aaa; cursor: not-allowed; animation: none; box-shadow: none; transform: none; text-shadow: none; }
 
-    <button class="menu-toggle-btn" id="menu-open-btn">☰ TERMINAL</button>
+					.admin-btn { font-family: 'Orbitron', sans-serif; background-color: transparent; color: #ef4444; padding: 12px 20px; border: 1px solid rgba(239, 68, 68, 0.5); border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 20px; width: 100%; display: none; transition: 0.3s; letter-spacing: 2px; }
+					.admin-btn:hover { background-color: rgba(239, 68, 68, 0.15); border-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
 
-    <div class="sidebar" id="sidebar">
-        <button class="close-sidebar-btn" id="menu-close-btn">×</button>
-        <h2>MAIN MENU</h2>
-        
-        <button class="sidebar-btn" onclick="window.location.href='profile.html'">ACCOUNT SETTINGS</button>
-        <button class="sidebar-btn" id="settings-btn">AUDIO / VIDEO SETTINGS</button>
-        <button class="sidebar-btn logout-btn" id="logout-btn">DISCONNECT</button>
-    </div>
+					.banned-screen { display: none; background: rgba(20,0,0,0.9); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
+					.banned-screen h1 { color: #ef4444; font-size: 60px; text-shadow: 0 0 30px #ef4444; margin-bottom: 10px; }
+					.banned-screen p { color: white; font-size: 24px; letter-spacing: 2px; }
+				</style>
+			</head>
+	<body>
 
-    <div class="user-card" id="main-card">
-        <h2 id="user-display-name">---</h2>
-        <h3 id="user-email">SYNCING DATA...</h3>
-        <p class="stat">ROLE <span id="user-role">---</span></p>
-        <p class="stat">TRUST POINTS <span id="user-trust">---</span></p>
-        <button class="admin-btn" id="admin-panel-btn">ADMIN OVERRIDE</button>
-    </div>
+		<div class="banned-screen" id="banned-screen">
+			<h1>ACCESS DENIED</h1>
+			<p>YOUR TRUST HAS BEEN REVOKED. ACCOUNT BANNED.</p>
+		</div>
 
-    <h1 id="main-title">THE DILEMMA</h1>
-    <button class="btn" id="play-btn">DEPLOY</button>
+		<button class="menu-toggle-btn" id="menu-open-btn">☰ TERMINAL</button>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+		<div class="sidebar" id="sidebar">
+			<button class="close-sidebar-btn" id="menu-close-btn">×</button>
+			<h2>MAIN MENU</h2>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCaDw0tyvGFqJgDTjaresWOe0SyCJo2Tt4",
-  authDomain: "the-dilemma-ky.firebaseapp.com",
-  projectId: "the-dilemma-ky",
-  storageBucket: "the-dilemma-ky.firebasestorage.app",
-  messagingSenderId: "785323303290",
-  appId: "1:785323303290:web:370f052cc499c8c410f6c3"
-};
+			<button class="sidebar-btn" onclick="window.location.href='profile.html'">ACCOUNT SETTINGS</button>
+			<button class="sidebar-btn" id="settings-btn">AUDIO / VIDEO SETTINGS</button>
+			<button class="sidebar-btn logout-btn" id="logout-btn">DISCONNECT</button>
+		</div>
 
+		<div class="user-card" id="main-card">
+			<h2 id="user-display-name">---</h2>
+			<h3 id="user-email">SYNCING DATA...</h3>
+			<p class="stat">
+				ROLE <span id="user-role">---</span>
+			</p>
+			<p class="stat">
+				TRUST POINTS <span id="user-trust">---</span>
+			</p>
+			<button class="admin-btn" id="admin-panel-btn">ADMIN OVERRIDE</button>
+		</div>
 
+		<h1 id="main-title">THE DILEMMA</h1>
+		<button class="btn" id="play-btn">DEPLOY</button>
 
-        const displayName = document.getElementById('user-display-name');
-        const emailDisplay = document.getElementById('user-email');
-        const roleDisplay = document.getElementById('user-role');
-        const trustDisplay = document.getElementById('user-trust');
-        const adminBtn = document.getElementById('admin-panel-btn');
-        const playBtn = document.getElementById('play-btn');
-        const sidebar = document.getElementById('sidebar');
-        const menuOpenBtn = document.getElementById('menu-open-btn');
-        const menuCloseBtn = document.getElementById('menu-close-btn');
-        const logoutBtn = document.getElementById('logout-btn');
+		<script type="module">
+			import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+			import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+			import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
-        menuOpenBtn.addEventListener('click', () => sidebar.classList.add('active'));
-        menuCloseBtn.addEventListener('click', () => sidebar.classList.remove('active'));
+			// الكونفيج الجديد بتاعك
+			const firebaseConfig = {
+			apiKey: "AIzaSyCaDw0tyvGFqJgDTjaresWOe0SyCJo2Tt4",
+			authDomain: "the-dilemma-ky.firebaseapp.com",
+			projectId: "the-dilemma-ky",
+			storageBucket: "the-dilemma-ky.firebasestorage.app",
+			messagingSenderId: "785323303290",
+			appId: "1:785323303290:web:370f052cc499c8c410f6c3"
+			};
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                onSnapshot(doc(db, "users", user.uid), (docSnap) => {
-                    if (docSnap.exists()) {
-                        const userData = docSnap.data();
-                        if (userData.role === "banned") { document.getElementById('banned-screen').style.display = "flex"; return; }
-                        displayName.innerText = userData.username ? userData.username.toUpperCase() : "OPERATIVE";
-                        emailDisplay.innerText = userData.email;
-                        roleDisplay.innerText = userData.role.toUpperCase();
-                        trustDisplay.innerText = userData.trustPoints;
-                        if (userData.role === "admin") { adminBtn.style.display = "block"; }
-                    }
-                });
+			const app = initializeApp(firebaseConfig);
+			const auth = getAuth(app);
+			const db = getFirestore(app);
 
-                onSnapshot(doc(db, "server", "status"), (docSnap) => {
-                    if (docSnap.exists() && roleDisplay.innerText !== "ADMIN" && roleDisplay.innerText !== "BANNED") {
-                        if (docSnap.data().isLocked) { playBtn.disabled = true; playBtn.innerText = "SERVER LOCKDOWN"; } 
-                        else { playBtn.disabled = false; playBtn.innerText = "DEPLOY"; }
-                    }
-                });
-            } else {
-                window.location.href = "index.html";
-            }
-        });
+			const displayName = document.getElementById('user-display-name');
+			const emailDisplay = document.getElementById('user-email');
+			const roleDisplay = document.getElementById('user-role');
+			const trustDisplay = document.getElementById('user-trust');
+			const adminBtn = document.getElementById('admin-panel-btn');
+			const playBtn = document.getElementById('play-btn');
+			const sidebar = document.getElementById('sidebar');
+			const menuOpenBtn = document.getElementById('menu-open-btn');
+			const menuCloseBtn = document.getElementById('menu-close-btn');
+			const logoutBtn = document.getElementById('logout-btn');
 
-        logoutBtn.addEventListener('click', async () => { try { await signOut(auth); } catch (error) { alert("ERROR DISCONNECTING!"); } });
-        playBtn.addEventListener('click', () => { if(!playBtn.disabled) alert("SYSTEM SECURED. GAME DEPLOYMENT PENDING..."); });
-        adminBtn.addEventListener('click', () => { window.location.href = "admin.html"; });
-    </script>
-</body>
+			menuOpenBtn.addEventListener('click', () => sidebar.classList.add('active'));
+			menuCloseBtn.addEventListener('click', () => sidebar.classList.remove('active'));
+
+			onAuthStateChanged(auth, async (user) => {
+			if (user) {
+			onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+			if (docSnap.exists()) {
+			const userData = docSnap.data();
+			if (userData.role === "banned") { document.getElementById('banned-screen').style.display = "flex"; return; }
+			displayName.innerText = userData.username ? userData.username.toUpperCase() : "OPERATIVE";
+			emailDisplay.innerText = userData.email;
+			roleDisplay.innerText = userData.role.toUpperCase();
+			trustDisplay.innerText = userData.trustPoints;
+			if (userData.role === "admin") { adminBtn.style.display = "block"; }
+			}
+			});
+
+			onSnapshot(doc(db, "server", "status"), (docSnap) => {
+			if (docSnap.exists() && roleDisplay.innerText !== "ADMIN" && roleDisplay.innerText !== "BANNED") {
+			if (docSnap.data().isLocked) { playBtn.disabled = true; playBtn.innerText = "SERVER LOCKDOWN"; }
+			else { playBtn.disabled = false; playBtn.innerText = "DEPLOY"; }
+			}
+			});
+			} else {
+			window.location.href = "index.html";
+			}
+			});
+
+			logoutBtn.addEventListener('click', async () => { try { await signOut(auth); } catch (error) { alert("ERROR DISCONNECTING!"); } });
+			playBtn.addEventListener('click', () => { if(!playBtn.disabled) alert("SYSTEM SECURED. GAME DEPLOYMENT PENDING..."); });
+			adminBtn.addEventListener('click', () => { window.location.href = "admin.html"; });
+		</script>
+	</body>
 </html>
