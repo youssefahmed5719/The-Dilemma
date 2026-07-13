@@ -5,35 +5,14 @@ const https = require("https");
 const { spawn } = require("child_process");
 const extract = require("extract-zip");
 
-const { initializeApp } = require("firebase/app");
-const {
-  initializeAuth,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-} = require("firebase/auth");
-const { getFirestore, doc, getDoc } = require("firebase/firestore");
-
-const { createFilePersistence } = require("./filePersistence");
-const firebaseConfig = require("./firebaseConfig");
+// This process does Node/OS work only - no Firebase here. Firebase Auth's
+// SDK assumes a browser-like environment and breaks in Electron's main
+// process ("INTERNAL ASSERTION FAILED: Expected a class definition"); it
+// belongs in the renderer, which is a real Chromium context. See src/firebase.js.
 
 const USER_DATA = app.getPath("userData");
 const INSTALL_DIR = path.join(USER_DATA, "game");
 const VERSION_FILE = path.join(INSTALL_DIR, "version.json");
-const AUTH_SESSION_FILE = path.join(USER_DATA, "auth-session.json");
-
-const firebaseApp = initializeApp(firebaseConfig);
-const auth = initializeAuth(firebaseApp, {
-  persistence: createFilePersistence(AUTH_SESSION_FILE),
-});
-const db = getFirestore(firebaseApp);
-
-// Game builds are distributed as public GitHub Release assets, not Firebase
-// Storage. Returns "windows" or "mac", matching the sub-object keys on the
-// gameVersion/launcher Firestore docs.
-function platformKey() {
-  return process.platform === "darwin" ? "mac" : "windows";
-}
 
 let mainWindow;
 
@@ -64,82 +43,12 @@ app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
 
-onAuthStateChanged(auth, async (user) => {
-  if (!mainWindow) return;
-  if (!user) {
-    mainWindow.webContents.send("auth:state", null);
-    return;
-  }
-  const profile = await loadProfile(user.uid);
-  if (!profile || profile.role === "banned") {
-    await signOut(auth);
-    mainWindow.webContents.send("auth:state", null);
-    return;
-  }
-  mainWindow.webContents.send("auth:state", profile);
-});
-
-async function loadProfile(uid) {
-  const snap = await getDoc(doc(db, "users", uid));
-  if (!snap.exists()) return null;
-  const data = snap.data();
-  return {
-    email: data.email,
-    username: data.username || null,
-    role: data.role,
-    trustPoints: data.trustPoints ?? 0,
-  };
-}
-
-function mapAuthError(err) {
-  const code = err && err.code ? err.code : "";
-  if (
-    code.includes("invalid-credential") ||
-    code.includes("wrong-password") ||
-    code.includes("user-not-found")
-  ) {
-    return "Invalid email or password.";
-  }
-  if (code.includes("too-many-requests")) {
-    return "Too many attempts. Try again later.";
-  }
-  if (code.includes("network-request-failed")) {
-    return "Network error. Check your connection.";
-  }
-  return (err && err.message) || "Login failed.";
-}
-
 // ---------------- window controls ----------------
 
 ipcMain.on("window:minimize", () => mainWindow && mainWindow.minimize());
 ipcMain.on("window:close", () => mainWindow && mainWindow.close());
 
-// ---------------- auth ----------------
-
-ipcMain.handle("auth:login", async (_e, { email, password }) => {
-  try {
-    const cred = await signInWithEmailAndPassword(auth, email, password);
-    const profile = await loadProfile(cred.user.uid);
-    if (!profile) {
-      await signOut(auth);
-      return { ok: false, error: "No player profile found for this account." };
-    }
-    if (profile.role === "banned") {
-      await signOut(auth);
-      return { ok: false, error: "This account has been banned." };
-    }
-    return { ok: true, profile };
-  } catch (err) {
-    return { ok: false, error: mapAuthError(err) };
-  }
-});
-
-ipcMain.handle("auth:logout", async () => {
-  await signOut(auth);
-  return { ok: true };
-});
-
-// ---------------- version / update / launch ----------------
+// ---------------- local install state ----------------
 
 function readInstalledVersion() {
   try {
@@ -153,6 +62,8 @@ function writeInstalledVersion(info) {
   fs.mkdirSync(INSTALL_DIR, { recursive: true });
   fs.writeFileSync(VERSION_FILE, JSON.stringify(info), "utf8");
 }
+
+ipcMain.handle("config:getInstalledVersion", () => readInstalledVersion());
 
 // Zips built from a Unity build folder often add one wrapping directory, so
 // search a couple of levels deep rather than only the top of INSTALL_DIR.
@@ -181,28 +92,7 @@ function findGameExecutable() {
   return exes[0] || null;
 }
 
-ipcMain.handle("game:status", async () => {
-  const installed = readInstalledVersion();
-
-  const [versionSnap, serverSnap] = await Promise.all([
-    getDoc(doc(db, "gameVersion", "latest")),
-    getDoc(doc(db, "server", "status")),
-  ]);
-
-  const latest = versionSnap.exists() ? versionSnap.data() : null;
-  const platformBuild = latest ? latest[platformKey()] || null : null;
-  const serverLocked = serverSnap.exists() ? !!serverSnap.data().isLocked : false;
-  const needsUpdate = !!platformBuild && (!installed || installed.version !== latest.version);
-
-  return {
-    installed,
-    latest,
-    platformAvailable: !!platformBuild,
-    needsUpdate,
-    serverLocked,
-    exePath: findGameExecutable(),
-  };
-});
+// ---------------- download / install / launch ----------------
 
 function downloadWithProgress(url, destPath, onProgress) {
   return new Promise((resolve, reject) => {
@@ -234,21 +124,14 @@ function downloadWithProgress(url, destPath, onProgress) {
   });
 }
 
-ipcMain.handle("game:update", async () => {
-  const versionSnap = await getDoc(doc(db, "gameVersion", "latest"));
-  if (!versionSnap.exists()) {
-    throw new Error("No build has been published yet.");
-  }
-  const latest = versionSnap.data();
-  const build = latest[platformKey()];
-  if (!build) {
-    throw new Error(`No ${platformKey()} build has been published yet.`);
-  }
+ipcMain.handle("game:downloadAndInstall", async (_e, { downloadUrl, version }) => {
+  if (!downloadUrl) throw new Error("No download URL provided.");
+  if (!version) throw new Error("No version provided.");
 
-  const zipPath = path.join(app.getPath("temp"), `dilemma-${latest.version}.zip`);
+  const zipPath = path.join(app.getPath("temp"), `dilemma-${version}.zip`);
 
   mainWindow.webContents.send("game:progress", { phase: "download", pct: 0 });
-  await downloadWithProgress(build.downloadUrl, zipPath, (pct, receivedBytes, totalBytes) => {
+  await downloadWithProgress(downloadUrl, zipPath, (pct, receivedBytes, totalBytes) => {
     mainWindow.webContents.send("game:progress", {
       phase: "download",
       pct,
@@ -263,7 +146,7 @@ ipcMain.handle("game:update", async () => {
   await extract(zipPath, { dir: INSTALL_DIR });
   fs.unlink(zipPath, () => {});
 
-  writeInstalledVersion({ version: latest.version, installedAt: Date.now() });
+  writeInstalledVersion({ version, installedAt: Date.now() });
   mainWindow.webContents.send("game:progress", { phase: "done", pct: 100 });
 
   return { ok: true, exePath: findGameExecutable() };
