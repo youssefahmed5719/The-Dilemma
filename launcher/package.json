@@ -1,0 +1,48 @@
+{
+  "name": "the-dilemma-launcher",
+  "version": "1.0.0",
+  "description": "Official launcher for The Dilemma",
+  "main": "main.js",
+  "author": "The Dilemma",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac"
+  },
+  "dependencies": {
+    "extract-zip": "^2.0.1",
+    "firebase": "^10.14.1"
+  },
+  "devDependencies": {
+    "electron": "^32.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.thedilemma.launcher",
+    "productName": "The Dilemma Launcher",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "filePersistence.js",
+      "firebaseConfig.js",
+      "src/**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.games"
+    }
+  }
+}

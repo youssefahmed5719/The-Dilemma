@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Dilemma Launcher</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="titlebar">
+    <span class="titlebar-label">THE DILEMMA — LAUNCHER</span>
+    <div class="titlebar-controls">
+      <button id="min-btn" class="titlebar-btn">&#8211;</button>
+      <button id="close-btn" class="titlebar-btn close">&times;</button>
+    </div>
+  </div>
+
+  <!-- LOGIN SCREEN -->
+  <section id="login-screen" class="screen">
+    <div class="login-card">
+      <span class="game-title">THE DILEMMA</span>
+      <h2>LAUNCHER LOGIN</h2>
+      <input type="email" id="email-input" placeholder="ACCESS EMAIL" autocomplete="username">
+      <input type="password" id="password-input" placeholder="ACCESS CODE" autocomplete="current-password">
+      <p id="login-error" class="error-text"></p>
+      <button id="login-btn">ENTER</button>
+    </div>
+  </section>
+
+  <!-- LAUNCHER SCREEN -->
+  <section id="launcher-screen" class="screen hidden">
+    <div class="launcher-layout">
+
+      <aside class="side-panel">
+        <h2 id="display-name">---</h2>
+        <p id="display-email" class="muted">SYNCING DATA...</p>
+        <p class="stat">ROLE <span id="display-role" class="role-badge">---</span></p>
+        <p class="stat">TRUST POINTS <span id="display-trust">---</span></p>
+        <button id="logout-btn" class="ghost-btn">DISCONNECT</button>
+      </aside>
+
+      <main class="main-panel">
+        <h1>THE DILEMMA</h1>
+        <p id="version-line" class="muted">CHECKING VERSION...</p>
+
+        <div id="progress-wrap" class="progress-wrap hidden">
+          <div class="progress-track">
+            <div id="progress-fill" class="progress-fill"></div>
+          </div>
+          <p id="progress-text" class="muted">DOWNLOADING 0%</p>
+        </div>
+
+        <button id="action-btn" class="btn" disabled>CHECKING...</button>
+        <p id="status-error" class="error-text"></p>
+      </main>
+
+    </div>
+  </section>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

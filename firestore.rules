@@ -1,0 +1,64 @@
+rules_version = '2';
+
+// Firestore security rules for The Dilemma.
+//
+// NOTE: this repo had no firestore.rules checked in before now, so your live
+// rules in the Firebase console may differ from this file. Read through this
+// against what's currently deployed (Firebase Console -> Firestore -> Rules)
+// before publishing, so you don't accidentally tighten something that other
+// parts of the site depend on.
+//
+// This file reproduces the access patterns already used by index.html,
+// dashboard.html, admin.html and profile.html, and adds rules for the two
+// new collections the launcher needs: gameVersion and launcher.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // users/{uid}: email, role, trustPoints, username
+    match /users/{userId} {
+      // dashboard leaderboard query reads across all users, so any signed-in user can read
+      allow read: if isSignedIn();
+      // index.html creates this doc on sign-up, only for the account being created
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      // profile.html lets a user update their own username;
+      // admin.html lets an admin update role/trustPoints on anyone
+      allow update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // server/status: { isLocked: boolean }
+    match /server/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // gameVersion/latest: { version, releaseNotes, releasedAt, releasedBy,
+    //   windows: { downloadUrl, fileName } | null, mac: { downloadUrl, fileName } | null }
+    // downloadUrl points at a public GitHub Release asset - no Firebase Storage involved.
+    match /gameVersion/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // launcher/current: same shape as gameVersion/latest, minus releaseNotes.
+    match /launcher/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Deny everything else by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

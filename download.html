@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The Dilemma - Download Launcher</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0; font-family: 'Rajdhani', sans-serif; color: white;
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background-color: #030108; position: relative; overflow-x: hidden;
+        }
+
+        body::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 40%), radial-gradient(circle at 70% 70%, rgba(59, 130, 246, 0.1) 0%, transparent 40%); animation: moveLights 15s linear infinite alternate; z-index: -2; }
+        body::after { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px); background-size: 40px 40px; animation: moveGrid 20s linear infinite; z-index: -1; }
+        @keyframes moveLights { 0% { transform: rotate(0deg) scale(1); } 100% { transform: rotate(360deg) scale(1.2); } }
+        @keyframes moveGrid { 0% { background-position: 0px 0px; } 100% { background-position: 40px 40px; } }
+        @keyframes cardBreathe { 0% { box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1); } 100% { box-shadow: 0 10px 40px rgba(139, 92, 246, 0.3); } }
+        @keyframes pulseBtn { 0% { box-shadow: 0 0 15px rgba(139, 92, 246, 0.4); } 50% { box-shadow: 0 0 35px rgba(139, 92, 246, 0.8); } 100% { box-shadow: 0 0 15px rgba(139, 92, 246, 0.4); } }
+
+        .back-btn {
+            position: absolute; top: 20px; left: 20px; font-family: 'Orbitron', sans-serif;
+            padding: 10px 20px; font-size: 14px; background: transparent; color: #8b5cf6;
+            border: 1px solid #8b5cf6; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold;
+        }
+        .back-btn:hover { background: rgba(139, 92, 246, 0.2); box-shadow: 0 0 15px #8b5cf6; color: white; }
+
+        h1 { font-family: 'Orbitron', sans-serif; font-size: 40px; margin-bottom: 6px; letter-spacing: 5px; text-shadow: 0 0 15px #8b5cf6, 0 0 30px rgba(139, 92, 246, 0.6); text-transform: uppercase; text-align: center; }
+        .subtitle { color: #a78bfa; letter-spacing: 2px; margin-bottom: 40px; font-size: 14px; text-transform: uppercase; }
+
+        .download-card {
+            background: rgba(15, 10, 25, 0.6); backdrop-filter: blur(20px); padding: 45px;
+            width: 380px; max-width: 90%; border: 1px solid rgba(139, 92, 246, 0.3);
+            border-top: 4px solid #8b5cf6; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: cardBreathe 4s infinite alternate; text-align: center;
+        }
+
+        .version-tag { font-family: 'Orbitron', sans-serif; font-size: 13px; color: #10b981; letter-spacing: 2px; margin-bottom: 24px; }
+
+        .btn {
+            font-family: 'Orbitron', sans-serif; padding: 16px 40px; font-size: 20px; font-weight: 900;
+            cursor: pointer; background: #8b5cf6; color: white; border: none; border-radius: 16px;
+            transition: 0.4s ease; letter-spacing: 3px; animation: pulseBtn 3s infinite; width: 100%;
+            box-sizing: border-box; text-decoration: none; display: block;
+        }
+        .btn:hover { background-color: #7c3aed; transform: scale(1.03) translateY(-3px); }
+        .btn:disabled { background: #555; color: #aaa; cursor: not-allowed; animation: none; box-shadow: none; transform: none; }
+
+        .alt-link {
+            display: inline-block; margin-top: 18px; color: #a78bfa; font-size: 13px;
+            letter-spacing: 1px; text-decoration: none; border-bottom: 1px dashed rgba(139,92,246,0.4);
+            transition: 0.3s;
+        }
+        .alt-link:hover { color: #8b5cf6; border-color: #8b5cf6; }
+
+        .hint { color: #888; font-size: 13px; margin-top: 20px; line-height: 1.5; }
+
+        .status-line { color: #aaa; font-size: 14px; margin: 30px 0; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+    <button class="back-btn" onclick="window.location.href='dashboard.html'">BACK TO HQ</button>
+
+    <h1>DOWNLOAD LAUNCHER</h1>
+    <p class="subtitle">One installer. Every future update.</p>
+
+    <div id="loading-line" class="status-line">CHECKING FOR AVAILABLE BUILDS...</div>
+
+    <div class="download-card" id="download-card" style="display:none;">
+        <p class="version-tag" id="version-tag">LAUNCHER v---</p>
+        <a class="btn" id="download-btn" href="#">PREPARING...</a>
+        <a class="alt-link" id="alt-link" style="display:none;" href="#"></a>
+        <p class="hint">Run the installer, sign in with your existing account, and the launcher will always keep your game build up to date.</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCaDw0tyvGFqJgDTjaresWOe0SyCJo2Tt4",
+            authDomain: "the-dilemma-ky.firebaseapp.com",
+            projectId: "the-dilemma-ky",
+            storageBucket: "the-dilemma-ky.firebasestorage.app",
+            messagingSenderId: "785323303290",
+            appId: "1:785323303290:web:370f052cc499c8c410f6c3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const loadingLine = document.getElementById('loading-line');
+        const downloadCard = document.getElementById('download-card');
+        const versionTag = document.getElementById('version-tag');
+        const downloadBtn = document.getElementById('download-btn');
+        const altLink = document.getElementById('alt-link');
+
+        // كشف نظام تشغيل الزائر (ويندوز أو ماك) عشان نظهر الرابط المناسب أول حاجة
+        function detectPlatform() {
+            const uaPlatform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || navigator.userAgent;
+            const p = uaPlatform.toLowerCase();
+            if (p.includes('mac') || p.includes('darwin')) return 'mac';
+            if (p.includes('win')) return 'windows';
+            return 'windows'; // افتراضي معقول لو مش عارفين
+        }
+
+        const PLATFORM_LABEL = { windows: 'WINDOWS', mac: 'MAC' };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = "index.html"; return; }
+
+            try {
+                const snap = await getDoc(doc(db, "launcher", "current"));
+                if (!snap.exists()) {
+                    loadingLine.textContent = "NO LAUNCHER BUILD HAS BEEN PUBLISHED YET.";
+                    return;
+                }
+                const data = snap.data();
+                const builds = { windows: data.windows || null, mac: data.mac || null };
+
+                if (!builds.windows && !builds.mac) {
+                    loadingLine.textContent = "NO LAUNCHER BUILD HAS BEEN PUBLISHED YET.";
+                    return;
+                }
+
+                const detected = detectPlatform();
+                const primary = builds[detected] ? detected : (detected === 'windows' ? 'mac' : 'windows');
+                const secondary = primary === 'windows' ? 'mac' : 'windows';
+
+                versionTag.textContent = `LAUNCHER v${data.version}`;
+                downloadBtn.textContent = `DOWNLOAD FOR ${PLATFORM_LABEL[primary]}`;
+                downloadBtn.href = builds[primary].downloadUrl;
+
+                if (builds[secondary]) {
+                    altLink.textContent = `Not on ${PLATFORM_LABEL[primary]}? Download for ${PLATFORM_LABEL[secondary]} instead`;
+                    altLink.href = builds[secondary].downloadUrl;
+                    altLink.style.display = 'inline-block';
+                }
+
+                loadingLine.style.display = 'none';
+                downloadCard.style.display = 'block';
+            } catch (error) {
+                loadingLine.textContent = "ERROR LOADING LAUNCHER: " + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
