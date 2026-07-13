@@ -1,3 +1,7 @@
+import { auth, db } from './firebase.js';
+import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
+
 const loginScreen = document.getElementById('login-screen');
 const launcherScreen = document.getElementById('launcher-screen');
 
@@ -19,11 +23,40 @@ const progressWrap = document.getElementById('progress-wrap');
 const progressFill = document.getElementById('progress-fill');
 const progressText = document.getElementById('progress-text');
 
-document.getElementById('min-btn').addEventListener('click', () => window.api.minimize());
-document.getElementById('close-btn').addEventListener('click', () => window.api.close());
+document.getElementById('min-btn').addEventListener('click', () => window.launcherAPI.minimize());
+document.getElementById('close-btn').addEventListener('click', () => window.launcherAPI.close());
 
-let currentStatus = null; // last result of gameStatus()
+let currentStatus = null; // last result of refreshStatus()
 let busy = false;
+
+// Electron's renderer is a real Chromium process, so this is the actual
+// host OS - same technique the website's download.html uses.
+function detectPlatform() {
+  const uaPlatform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || navigator.userAgent;
+  return uaPlatform.toLowerCase().includes('mac') ? 'mac' : 'windows';
+}
+
+function mapAuthError(err) {
+  const code = (err && err.code) || '';
+  if (code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found')) {
+    return 'Invalid email or password.';
+  }
+  if (code.includes('too-many-requests')) return 'Too many attempts. Try again later.';
+  if (code.includes('network-request-failed')) return 'Network error. Check your connection.';
+  return (err && err.message) || 'Login failed.';
+}
+
+async function loadProfile(uid) {
+  const snap = await getDoc(doc(db, 'users', uid));
+  if (!snap.exists()) return null;
+  const data = snap.data();
+  return {
+    email: data.email,
+    username: data.username || null,
+    role: data.role,
+    trustPoints: data.trustPoints ?? 0,
+  };
+}
 
 function showLogin() {
   loginScreen.classList.remove('hidden');
@@ -43,12 +76,18 @@ function showLauncher(profile) {
   refreshStatus();
 }
 
-window.api.onAuthState((profile) => {
-  if (profile) {
-    showLauncher(profile);
-  } else {
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
     showLogin();
+    return;
   }
+  const profile = await loadProfile(user.uid);
+  if (!profile || profile.role === 'banned') {
+    await signOut(auth);
+    showLogin();
+    return;
+  }
+  showLauncher(profile);
 });
 
 loginBtn.addEventListener('click', doLogin);
@@ -64,20 +103,19 @@ async function doLogin() {
   }
   loginBtn.disabled = true;
   loginBtn.textContent = 'CONNECTING...';
-  const result = await window.api.login(email, password);
-  loginBtn.disabled = false;
-  loginBtn.textContent = 'ENTER';
-  if (!result.ok) {
-    loginError.textContent = result.error;
-    return;
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    passwordInput.value = ''; // onAuthStateChanged drives the screen switch
+  } catch (err) {
+    loginError.textContent = mapAuthError(err);
+  } finally {
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'ENTER';
   }
-  passwordInput.value = '';
-  showLauncher(result.profile);
 }
 
 logoutBtn.addEventListener('click', async () => {
-  await window.api.logout();
-  showLogin();
+  await signOut(auth);
 });
 
 async function refreshStatus() {
@@ -85,7 +123,19 @@ async function refreshStatus() {
   actionBtn.disabled = true;
   actionBtn.textContent = 'CHECKING...';
   try {
-    currentStatus = await window.api.gameStatus();
+    const platform = detectPlatform();
+    const [installed, versionSnap, serverSnap] = await Promise.all([
+      window.launcherAPI.getInstalledVersion(),
+      getDoc(doc(db, 'gameVersion', 'latest')),
+      getDoc(doc(db, 'server', 'status')),
+    ]);
+
+    const latest = versionSnap.exists() ? versionSnap.data() : null;
+    const platformBuild = latest ? (latest[platform] || null) : null;
+    const serverLocked = serverSnap.exists() ? !!serverSnap.data().isLocked : false;
+    const needsUpdate = !!platformBuild && (!installed || installed.version !== latest.version);
+
+    currentStatus = { installed, latest, platformBuild, platformAvailable: !!platformBuild, needsUpdate, serverLocked };
     renderStatus();
   } catch (err) {
     statusError.textContent = err.message || 'Could not reach the server.';
@@ -110,7 +160,7 @@ function renderStatus() {
   actionBtn.classList.remove('locked');
   actionBtn.onclick = null;
 
-  if (s.serverLocked && !s.needsUpdate && s.exePath) {
+  if (s.serverLocked && !s.needsUpdate && s.installed) {
     actionBtn.textContent = 'SERVER LOCKDOWN';
     actionBtn.classList.add('locked');
     actionBtn.disabled = true;
@@ -123,7 +173,7 @@ function renderStatus() {
     return;
   }
 
-  if (!s.platformAvailable && !s.exePath) {
+  if (!s.platformAvailable && !s.installed) {
     actionBtn.textContent = 'NOT AVAILABLE FOR YOUR OS';
     actionBtn.disabled = true;
     return;
@@ -141,7 +191,7 @@ function renderStatus() {
   actionBtn.onclick = doLaunch;
 }
 
-window.api.onProgress(({ phase, pct }) => {
+window.launcherAPI.onDownloadProgress(({ phase, pct }) => {
   progressWrap.classList.remove('hidden');
   if (phase === 'download') {
     progressFill.style.width = pct + '%';
@@ -156,7 +206,7 @@ window.api.onProgress(({ phase, pct }) => {
 });
 
 async function doUpdate() {
-  if (busy) return;
+  if (busy || !currentStatus || !currentStatus.platformBuild) return;
   busy = true;
   statusError.textContent = '';
   actionBtn.disabled = true;
@@ -165,7 +215,8 @@ async function doUpdate() {
   progressFill.style.width = '0%';
   progressText.textContent = 'DOWNLOADING 0%';
   try {
-    await window.api.updateGame();
+    const { latest, platformBuild } = currentStatus;
+    await window.launcherAPI.downloadAndInstall(platformBuild.downloadUrl, latest.version);
     await refreshStatus();
   } catch (err) {
     statusError.textContent = err.message || 'Update failed.';
@@ -184,7 +235,7 @@ async function doLaunch() {
   actionBtn.disabled = true;
   actionBtn.textContent = 'LAUNCHING...';
   try {
-    await window.api.launchGame();
+    await window.launcherAPI.launchGame();
     actionBtn.textContent = 'DEPLOY';
   } catch (err) {
     statusError.textContent = err.message || 'Could not launch the game.';
